@@ -561,9 +561,11 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       const box = $('endPortrait'); box.innerHTML = '';
       const inner = document.createElement('div'); inner.className = 'portrait color'; box.appendChild(inner);
       const im = new Image(); im.alt = '';
-      im.onload = () => { inner.innerHTML = ''; inner.appendChild(im); inner.classList.add('hasPortrait'); };
-      im.onerror = () => renderPortrait(box, state.gender, state.job, tomb, endId);
+      im.onload = () => { if (inner.dataset.anim) return; inner.innerHTML = ''; inner.appendChild(im); inner.classList.add('hasPortrait'); };
+      im.onerror = () => { if (!inner.dataset.anim) renderPortrait(box, state.gender, state.job, tomb, endId); };
       im.src = `assets/ending_${endId}.webp`;
+      endingAnim(inner, endId, state.gender);              // 有動畫就播動畫
+      inner.classList.add('hasPortrait');
     }
     $('endNew').classList.toggle('hidden', !isNew);
     $('endNew').textContent = isNew ? T('end_new') : '';
@@ -643,14 +645,29 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   function endingCount(id) { const u = state.unlocked[id]; return typeof u === 'number' ? u : (u ? u.n : 0); }
   // 結局圖：assets/ending_<id>_<性別>.png → ending_<id>.png（性別用第一次解開時的那隻）
   function endingArt(box, id, bw) {
-    box.innerHTML = '';
+    box.innerHTML = ''; delete box.dataset.anim;
     const u = state.unlocked[id]; const g = (u && u.gender) || state.gender;
     const cands = [`assets/ending_${id}_${g}.webp`, `assets/ending_${id}.webp`];
     const img = new Image(); img.alt = '';
-    img.onload = () => { box.innerHTML = ''; box.appendChild(img); };
-    img.onerror = () => { if (cands.length) img.src = cands.shift(); else box.innerHTML = `<div class="noart">${L(S.endings[id].name)}</div>`; };
+    img.onload = () => { if (box.dataset.anim) return; box.innerHTML = ''; box.appendChild(img); };
+    img.onerror = () => { if (box.dataset.anim) return; if (cands.length) img.src = cands.shift(); else box.innerHTML = `<div class="noart">${L(S.endings[id].name)}</div>`; };
     img.src = cands.shift();
     box.classList.toggle('bw', !!bw);
+  }
+  // 好結局／真結局動畫：assets/anim_<id>_<性別>.mp4 → anim_<id>.mp4；沒有影片就維持靜態圖
+  // 無聲、循環、在框內播放；載得到才把框裡的圖換掉
+  function endingAnim(box, id, gender) {
+    const cands = [`assets/anim_${id}_${gender}.mp4`, `assets/anim_${id}.mp4`];
+    const v = document.createElement('video');
+    v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.preload = 'auto';
+    v.addEventListener('loadeddata', () => {
+      box.dataset.anim = '1'; box.innerHTML = ''; box.appendChild(v);
+      const p = v.play(); if (p && p.catch) p.catch(() => {});
+    }, { once: true });
+    v.addEventListener('error', () => { if (cands.length) v.src = cands.shift(); });
+    v.src = cands.shift();
   }
   function openEndings() {
     const grid = $('endingsGrid'); grid.innerHTML = '';
@@ -680,6 +697,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     const at = colorAt(id);
     $('evCount').textContent = T('ev_count', { type: { death: T('end_death'), good: T('end_good'), true: T('end_true') }[e.type], n }) + (n < at ? T('ev_more', { k: at - n }) : '');
     endingArt($('evArt'), id, n < at);
+    if (e.type !== 'death' && n >= at) { const u = state.unlocked[id]; endingAnim($('evArt'), id, (u && u.gender) || state.gender); }
     $('evText').textContent = L(e.text);
     // 有漫畫才顯示按鈕；用載入圖片來判斷有沒有這張
     // 漫畫要跟結局圖同一個門檻：死亡結局 3 次、好／真結局 1 次，上色之後才解鎖
