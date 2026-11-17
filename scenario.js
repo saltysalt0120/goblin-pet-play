@@ -15,8 +15,8 @@
       rareChance: 0.12,          // 每次來訊抽到好心 NPC 的機率
       fateChance: 0.03,          // 每次來訊抽到「月老擲筊」事件的機率；三圍全滿也會直接觸發（每世一次）
       fateFullStats: ['str', 'int', 'cha'],
-      bloodlineChance: 0.05,     // 出生時 1% 抽到「作者血脈」（只有哥布林會抽到），解鎖化妝
-      archmageAt: 12,            // 活過 30 封訊息沒死 → 大魔法師哥布林
+      bloodlineChance: 0.05,     // 出生時 5% 抽到「作者血脈」（只有哥布林會抽到），解鎖化妝
+      archmageAt: 12,            // 活過 12 封訊息沒死 → 大魔法師哥布林
       messageIntervalMs: [13000, 18000],    // 約 15 秒來一封，從上一段對話結束起算（規格書 6）
       fastIntervalMs: [4000, 8000],         // GOBLIN_FAST 測試模式
     },
