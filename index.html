@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="description" content="哥布林桌寵：一隻哥布林的一生。大部分的結局是被砍死。">
+  <meta name="theme-color" content="#14161b">
+  <title>哥布林桌寵</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 舞台：哥布林本體 -->
+    <div id="stage" class="drag">
+      <div id="bubble" class="bubble hidden"></div>
+      <div id="badge" class="badge hidden">1</div>
+      <div id="pet" class="no-drag" data-i18n-title="pet_tip"></div>
+      <div id="zzz" class="zzz hidden">z<span>z</span><span>z</span></div>
+    </div>
+
+    <!-- 狀態列 -->
+    <div id="panel" class="no-drag">
+      <div class="statusline">
+        <span id="jobName"></span>
+        <span id="dayCount" data-i18n="day_count_new"></span>
+      </div>
+      <div class="stats">
+        <div class="stat" data-stat="str" data-icon="gym"><span class="ic">💪</span><div class="bar"><i></i></div><b>0</b></div>
+        <div class="stat" data-stat="int" data-icon="read"><span class="ic">📖</span><div class="bar"><i></i></div><b>0</b></div>
+        <div class="stat" data-stat="cha" data-icon="dress"><span class="ic">👔</span><div class="bar"><i></i></div><b>0</b></div>
+        <div class="stat" data-stat="gold" data-icon="gold"><span class="ic">💰</span><div class="bar"><i></i></div><b>0</b></div>
+        <div class="stat" data-stat="food" data-icon="food"><span class="ic">🍖</span><div class="bar"><i></i></div><b>0</b></div>
+        <div class="stat" data-stat="energy" data-icon="energy"><span class="ic">🔋</span><div class="bar"><i></i></div><b>0</b></div>
+        <div class="stat hidden" data-stat="glam" data-icon="makeup"><span class="ic">💄</span><div class="bar"><i></i></div><b>0</b></div>
+      </div>
+      <div class="actions" id="actions"></div>
+      <div class="toolbar">
+        <button id="btnInbox" data-i18n-title="tb_inbox_t" data-icon="inbox"><span class="ic">✉️</span><span data-i18n="tb_inbox"></span></button>
+        <button id="btnCollection" data-i18n-title="tb_graves_t" data-icon="graves"><span class="ic">🖼️</span><span data-i18n="tb_graves"></span></button>
+        <button id="btnEndings" data-i18n-title="tb_endings_t" data-icon="endings"><span class="ic">📕</span><span data-i18n="tb_endings"></span></button>
+        <button id="btnRules" data-i18n-title="tb_rules_t" data-icon="rules"><span class="ic">📜</span><span data-i18n="tb_rules"></span></button>
+        <button id="btnFeedback" data-i18n-title="tb_fb_t" data-icon="feedback"><span class="ic">💬</span><span data-i18n="tb_fb"></span></button>
+        <button id="btnSettings" data-i18n-title="tb_set_t" data-icon="settings"><span class="ic">⚙️</span><span data-i18n="tb_set"></span></button>
+      </div>
+    </div>
+
+    <!-- 開局：選哥布林或哥布美 -->
+    <div id="startScreen" class="overlay hidden">
+      <h1 data-i18n="pick_title"></h1>
+      <div class="pick">
+        <button class="pickBtn" data-gender="m"><img class="big" src="assets/m_goblin_neutral.webp" alt=""><b data-i18n="pick_m"></b><small data-i18n="pick_m_sub"></small></button>
+        <button class="pickBtn" data-gender="f"><img class="big" src="assets/f_goblin_neutral.webp" alt=""><b data-i18n="pick_f"></b><small data-i18n="pick_f_sub"></small></button>
+      </div>
+      <p class="hint" data-i18n-html="pick_hint"></p>
+    </div>
+
+    <!-- 聊天 -->
+    <div id="chatScreen" class="overlay hidden">
+      <div class="chatHead">
+        <span id="chatAvatar">🗡️</span>
+        <div><div id="chatName">—</div><div id="chatKind" class="sub"></div></div>
+        <button id="chatClose" class="x" data-i18n-title="chat_close_t">✕</button>
+      </div>
+      <div id="chatLog" class="chatLog"></div>
+      <div id="chatChoices" class="choices"></div>
+    </div>
+
+    <!-- 擲筊小遊戲 -->
+    <div id="jiaoScreen" class="overlay hidden">
+      <div class="jiaoHead" data-i18n="jiao_head"></div>
+      <div class="jiaoDots" id="jiaoDots"></div>
+      <div class="jiaoStage" id="jiaoStage">
+        <img id="jiaoArt" alt="">            <!-- 月老反應（背景） -->
+        <img id="jiaoRays" class="rays hidden" src="assets/jiaoP_rays.webp" alt="">
+        <div id="jiaoTray" class="tray">      <!-- 可以滑或搖的筊 -->
+          <img id="jiaoP1" class="pc" src="assets/jiaoP_flat.webp" alt="">
+          <img id="jiaoP2" class="pc" src="assets/jiaoP_round.webp" alt="">
+        </div>
+      </div>
+      <div id="jiaoCount" class="jiaoCount" data-i18n="jiao_count0"></div>
+      <p id="jiaoHint" class="hint" data-i18n="jiao_tip"></p>
+      <button id="jiaoBtn" class="primary" data-i18n="jiao_btn"></button>
+      <p class="hint tiny" data-i18n="jiao_tip_btn"></p>
+    </div>
+
+    <!-- 結局 -->
+    <div id="endScreen" class="overlay hidden">
+      <div id="endType" class="endType"></div>
+      <div id="endPortrait" class="frame big"></div>
+      <h1 id="endName">—</h1>
+      <p id="endText">—</p>
+      <div id="endNew" class="newTag hidden">✦ 新結局已收進圖鑑</div>
+      <button id="endBtn" class="primary">—</button>
+    </div>
+
+    <!-- 圖鑑 -->
+    <div id="collectionScreen" class="overlay hidden">
+      <div class="chatHead"><div><div data-i18n="graves_title"></div><div id="collCount" class="sub">0 / 0</div></div><button id="collClose" class="x">✕</button></div>
+      <div id="collList" class="collList wall"></div>
+    </div>
+
+    <!-- 遺照放大 -->
+    <div id="portraitView" class="overlay hidden">
+      <div class="chatHead"><div><div id="pvTitle">—</div><div id="pvSub" class="sub"></div></div><button id="pvClose" class="x">✕</button></div>
+      <div id="pvArt" class="frame pvBig"></div>
+      <p id="pvText" class="evText"></p>
+      <p id="pvStats" class="hint"></p>
+    </div>
+
+    <!-- 結局圖鑑 -->
+    <div id="endingsScreen" class="overlay hidden">
+      <div class="chatHead"><div><div data-i18n="endings_title"></div><div id="endingsCount" class="sub">0 / 0</div></div><button id="endingsClose" class="x">✕</button></div>
+      <div id="endingsGrid" class="endingsGrid"></div>
+    </div>
+    <div id="endingView" class="overlay hidden">
+      <div class="chatHead"><div><div id="evName">—</div><div id="evCount" class="sub"></div></div><button id="evClose" class="x">✕</button></div>
+      <div id="evArt" class="evArt"></div>
+      <p id="evText" class="evText"></p>
+      <button id="evComic" class="primary hidden" data-i18n="comic_open"></button>
+    </div>
+
+    <!-- 四格漫畫 -->
+    <div id="comicView" class="overlay hidden">
+      <div class="chatHead"><div><div id="cvName">—</div><div class="sub" data-i18n="comic_sub"></div></div><button id="cvClose" class="x">✕</button></div>
+      <div id="cvScroll" class="comicScroll"><img id="cvImg" alt=""></div>
+    </div>
+
+    <!-- 守則 -->
+    <div id="rulesScreen" class="overlay hidden">
+      <div class="chatHead"><div><div id="rulesTitle"></div><div class="sub" data-i18n="rules_sub"></div></div><button id="rulesClose" class="x">✕</button></div>
+      <ol id="rulesList" class="rules"></ol>
+    </div>
+
+
+    <!-- 留話給作者 -->
+    <div id="feedbackScreen" class="overlay hidden">
+      <div class="chatHead"><div><div data-i18n="fb_title"></div><div class="sub" data-i18n="fb_sub"></div></div><button id="fbClose" class="x">✕</button></div>
+      <textarea id="fbText" class="fbText" maxlength="1500" data-i18n-ph="fb_ph"></textarea>
+      <p id="fbWhere" class="hint">—</p>
+      <div class="settings row">
+        <button id="fbSend" class="primary hidden" data-i18n="fb_send"></button>
+        <button id="fbCopy" class="hidden" data-i18n="fb_copy"></button>
+      </div>
+      <p id="fbStat" class="hint"></p>
+      <p class="hint tiny" data-i18n="fb_foot"></p>
+    </div>
+
+    <!-- 設定 -->
+    <div id="settingsScreen" class="overlay hidden">
+      <div class="chatHead"><div data-i18n="set_title"></div><button id="setClose" class="x">✕</button></div>
+      <div class="settings">
+        <label><input type="checkbox" id="optNotify" checked> <span data-i18n="set_notify"></span></label>
+        <label><input type="checkbox" id="optMusic" checked> <span data-i18n="set_music"></span></label>
+        <label><input type="checkbox" id="optFast"> <span data-i18n="set_fast"></span></label>
+        <div class="langRow"><span data-i18n="set_lang"></span>
+          <div class="langBtns"><button id="langZh" data-lang="zh">中文</button><button id="langEn" data-lang="en">English</button></div>
+        </div>
+        <div class="row">
+          <button id="btnReset" class="danger" data-i18n="set_reset"></button>
+          <button id="btnWipe" class="danger" data-i18n="set_wipe"></button>
+        </div>
+        <p class="hint" data-i18n="set_foot_web"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="audio.js"></script>
+  <script src="scenario.js"></script>
+  <script src="sprite.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
