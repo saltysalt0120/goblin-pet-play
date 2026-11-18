@@ -328,9 +328,17 @@ button { font-family: inherit; cursor: pointer; }
 @media (max-width: 420px) {
   body { padding: 0; align-items: stretch; }
   #app { width: 100vw; height: 100dvh; border-radius: 0; }
-  #stage { flex: 1; height: auto; min-height: 230px; padding-bottom: 8px; }
+  /* 舞台會跟著螢幕長高，但立繪原本固定 190px，螢幕越高泡泡和哥布林之間就空越多
+     （390x844 量到 281px、414x896 量到 333px）。改成讓哥布林跟著可用高度長大，
+     並維持貼著地面站。 */
+  #stage { flex: 1; height: auto; min-height: 230px; padding-bottom: 8px;
+    container-type: size; }
   /* Netlify 免費方案會在右下角固定一個標章，留空間給它，不然會蓋到工具列 */
   #panel { flex: 0 0 auto; border-radius: var(--radius) var(--radius) 0 0;
     padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
-  #pet { width: 190px; height: auto; }
+  #pet { width: min(72vw, 340px); height: auto; max-height: 84%; }
+  #pet img.body { max-height: 100%; }
+  /* 泡泡原本釘在舞台最上緣（top:10px），哥布林貼底，中間整片空。
+     改成跟著哥布林往下浮，留一點頭上空間就好。 */
+  .bubble { top: auto; bottom: calc(84% + 6px); }
 }
