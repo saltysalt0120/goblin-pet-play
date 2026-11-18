@@ -1,4 +1,4 @@
-window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbie": 0, "d_arrow": 1, "d_run": 2, "d_human": 3, "d_selfquest": 4, "d_screenshot": 5, "d_tank": 6, "d_science": 7, "d_bro": 8, "d_landlord": 9, "d_kindness": 10, "d_guard": 11, "d_glowup": 12, "d_cold": 13, "d_starve": 14, "d_scare": 15, "d_honeytrap": 16, "g_alone": 17}};
+window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp?v=94998291-001311", "index": {"d_newbie": 0, "d_arrow": 1, "d_run": 2, "d_human": 3, "d_selfquest": 4, "d_screenshot": 5, "d_tank": 6, "d_science": 7, "d_bro": 8, "d_landlord": 9, "d_kindness": 10, "d_guard": 11, "d_glowup": 12, "d_cold": 13, "d_starve": 14, "d_scare": 15, "d_honeytrap": 16, "g_alone": 17}};
 // 哥布林桌寵——遊戲邏輯
 (function () {
   const S = window.SCENARIO;
@@ -147,7 +147,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       inner.appendChild(cell); inner.classList.add('hasPortrait');
       return;
     }
-    const cands = endId ? [`assets/portrait_${endId}_${gender}_${jobId}.webp`, `assets/portrait_${endId}_${gender}.webp`, `assets/portrait_${endId}.webp`] : [];
+    const cands = endId ? [`assets/portrait_${endId}_${gender}_${jobId}.webp?v=94998291-001311`, `assets/portrait_${endId}_${gender}.webp?v=94998291-001311`, `assets/portrait_${endId}.webp?v=94998291-001311`] : [];
     const tryNext = () => {
       if (!cands.length) { window.renderPortraitImg(inner, jobId, gender); return; }
       const img = new Image(); img.alt = '';
@@ -206,7 +206,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     const im = new Image();
     im.onload = () => { span.innerHTML = ''; span.appendChild(im); span.classList.add('hasIcon'); };
     im.alt = '';
-    im.src = `assets/icon_${name}.webp`;
+    im.src = `assets/icon_${name}.webp?v=94998291-001311`;
   }
 
   function showOverlay(id) {
@@ -379,7 +379,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     const t = thread();
     // NPC 頭像：assets/npc_<thread id>_<玩家性別>.png → npc_<thread id>.png → emoji（精靈會依玩家性別換人）
     const av = $('chatAvatar'); av.textContent = t.sender.avatar;
-    const avc = [`assets/npc_${t.id}_${state.gender}.webp`, `assets/npc_${t.id}.webp`];
+    const avc = [`assets/npc_${t.id}_${state.gender}.webp?v=94998291-001311`, `assets/npc_${t.id}.webp?v=94998291-001311`];
     const im = new Image(); im.onload = () => { av.textContent = ''; im.className = 'npcImg'; av.appendChild(im); };
     im.onerror = () => { if (avc.length) im.src = avc.shift(); }; im.src = avc.shift();
     $('chatName').textContent = L(t.sender.name);
@@ -461,17 +461,17 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   // 背景（月老反應）：assets/jiao_<offer|spin|sheng|xiao|yin|win>.png
   // 筊本體是 sprite：assets/jiaoP_flat.png / jiaoP_round.png / jiaoP_spin.png，會飛會落地
   function jiaoArt(key) {
-    const im = $('jiaoArt'); const src = `assets/jiao_${key}.webp`;
+    const im = $('jiaoArt'); const src = `assets/jiao_${key}.webp?v=94998291-001311`;
     if (im.getAttribute('src') === src) return;
     im.setAttribute('src', src); im.classList.remove('swap'); void im.offsetWidth; im.classList.add('swap');
   }
   // 依結果擺好兩個筊：聖＝一平一凸、笑＝兩平、陰＝兩凸
   function jiaoFaces(r) {
-    const f = 'assets/jiaoP_flat.webp', o = 'assets/jiaoP_round.webp';
+    const f = 'assets/jiaoP_flat.webp?v=94998291-001311', o = 'assets/jiaoP_round.webp?v=94998291-001311';
     return r === 'sheng' ? [f, o] : r === 'xiao' ? [f, f] : [o, o];
   }
   function jiaoSetPieces(r, spin) {
-    const [a, b] = spin ? ['assets/jiaoP_spin.webp', 'assets/jiaoP_spin.webp'] : jiaoFaces(r);
+    const [a, b] = spin ? ['assets/jiaoP_spin.webp?v=94998291-001311', 'assets/jiaoP_spin.webp?v=94998291-001311'] : jiaoFaces(r);
     $('jiaoP1').src = a; $('jiaoP2').src = b;
   }
 
@@ -641,7 +641,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       const im = new Image(); im.alt = '';
       im.onload = () => { if (inner.dataset.anim) return; inner.innerHTML = ''; inner.appendChild(im); inner.classList.add('hasPortrait'); };
       im.onerror = () => { if (!inner.dataset.anim) renderPortrait(box, state.gender, state.job, tomb, endId); };
-      im.src = `assets/ending_${endId}.webp`;
+      im.src = `assets/ending_${endId}.webp?v=94998291-001311`;
       endingAnim(inner, endId, state.gender);              // 有動畫就播動畫
       inner.classList.add('hasPortrait');
     }
@@ -725,7 +725,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   function endingArt(box, id, bw) {
     box.innerHTML = ''; delete box.dataset.anim;
     const u = state.unlocked[id]; const g = (u && u.gender) || state.gender;
-    const cands = [`assets/ending_${id}_${g}.webp`, `assets/ending_${id}.webp`];
+    const cands = [`assets/ending_${id}_${g}.webp?v=94998291-001311`, `assets/ending_${id}.webp?v=94998291-001311`];
     const img = new Image(); img.alt = '';
     img.onload = () => { if (box.dataset.anim) return; box.innerHTML = ''; box.appendChild(img); };
     img.onerror = () => { if (box.dataset.anim) return; if (cands.length) img.src = cands.shift(); else box.innerHTML = `<div class="noart">${L(S.endings[id].name)}</div>`; };
@@ -735,7 +735,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   // 好結局／真結局動畫：assets/anim_<id>_<性別>.mp4 → anim_<id>.mp4；沒有影片就維持靜態圖
   // 無聲、循環、在框內播放；載得到才把框裡的圖換掉
   function endingAnim(box, id, gender) {
-    const cands = [`assets/anim_${id}_${gender}.mp4`, `assets/anim_${id}.mp4`];
+    const cands = [`assets/anim_${id}_${gender}.mp4?v=94998291-001311`, `assets/anim_${id}.mp4?v=94998291-001311`];
     const v = document.createElement('video');
     v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
     v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
@@ -783,7 +783,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     if (n >= at) {
       const probe = new Image();
       probe.onload = () => { cb.classList.remove('hidden'); cb.onclick = () => openComic(id, probe.src); };
-      probe.src = `assets/comic_${id}.webp`;
+      probe.src = `assets/comic_${id}.webp?v=94998291-001311`;
     }
     showOverlay('endingView');
   }

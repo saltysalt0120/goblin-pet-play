@@ -32,11 +32,11 @@
 
   root.renderGoblin = function (box, jobId, gender) {
     const candidates = [
-      [`assets/${gender}_${jobId}.webp`, `${gender}_${jobId}`],
-      [`assets/${jobId}.webp`, jobId],
-      [`assets/${gender}.webp`, gender],
-      [`assets/${gender}_goblin.webp`, `${gender}_goblin`],
-      ['assets/goblin.webp', 'goblin'],
+      [`assets/${gender}_${jobId}.webp?v=94998291-001311`, `${gender}_${jobId}`],
+      [`assets/${jobId}.webp?v=94998291-001311`, jobId],
+      [`assets/${gender}.webp?v=94998291-001311`, gender],
+      [`assets/${gender}_goblin.webp?v=94998291-001311`, `${gender}_goblin`],
+      ['assets/goblin.webp?v=94998291-001311', 'goblin'],
     ];
     box.innerHTML = '';
     const img = document.createElement('img');
@@ -51,7 +51,7 @@
     img.onload = () => { box.innerHTML = ''; box.appendChild(img); img.onerror = null; };
     tryNext();
     // 預先探測這組有哪些表情圖，之後切換不會閃
-    for (const st of ['happy', 'angry', 'surprised', 'sleep', 'think']) probe(`assets/${box._key}_${st}.webp`);
+    for (const st of ['happy', 'angry', 'surprised', 'sleep', 'think']) probe(`assets/${box._key}_${st}.webp?v=94998291-001311`);
   };
 
   // 顯示表情 ms 毫秒後換回一般表情；ms=0 表示一直到 clearFace
@@ -61,7 +61,7 @@
     let src = null;
     for (const st of chain) {
       if (st === 'neutral') { src = box._base; break; }
-      const s = `assets/${box._key}_${st}.webp`;
+      const s = `assets/${box._key}_${st}.webp?v=94998291-001311`;
       if (await probe(s)) { src = s; break; }
     }
     if (!src || src === box._base) return false;
@@ -82,6 +82,6 @@
     const img = document.createElement('img'); img.alt = '';
     img.onload = () => { box.innerHTML = ''; box.appendChild(img); box.classList.add('hasPortrait'); };
     img.onerror = () => root.renderGoblin(box, jobId, gender);
-    img.src = `assets/${gender}_portrait.webp`;
+    img.src = `assets/${gender}_portrait.webp?v=94998291-001311`;
   };
 })(window);
