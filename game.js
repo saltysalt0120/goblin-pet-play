@@ -806,13 +806,16 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       img.onload = () => {
         if (token !== openComic._token) return;   // 中途換了一則漫畫
         if (n === 1) sc.scrollTop = 0;
-        addPart(n + 1);                           // 接下一段，沒有就 onerror 停
+        if (n >= 2) addPart(n + 1);               // 第三段以後才接力，沒有就 onerror 停
       };
       img.onerror = () => { if (n > 1) img.remove(); };
       img.src = n === 1 ? src : stem + '_' + n + ext;
-      sc.appendChild(img);
+      sc.appendChild(img);                        // 先排好位置，載完才會撐開高度
     };
+    // 前兩段同時發請求：第二段不必等第一段（約 2MB）載完才開始，
+    // 不然網路慢的時候中間會有幾秒看起來像漫畫就到此為止了。
     addPart(1);
+    addPart(2);
   }
   function openCollectionOld() {
     const list = $('collList'); list.innerHTML = '';
