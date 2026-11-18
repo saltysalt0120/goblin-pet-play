@@ -722,9 +722,15 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   }
   function openComic(id, src) {
     $('cvName').textContent = L(S.endings[id].name);
-    $('cvImg').src = src;
-    $('cvScroll').scrollTop = 0;
+    const img = $('cvImg'), sc = $('cvScroll');
+    // 先把浮層顯示出來再捲動：display:none 的元素設 scrollTop 無效，
+    // 會沿用上一則漫畫的位置，等於一打開就看到別人的最後一格。
     showOverlay('comicView');
+    img.removeAttribute('src');          // 先清掉，避免還顯示著上一張
+    sc.scrollTop = 0;
+    img.onload = () => { sc.scrollTop = 0; };   // 圖高度改變後再歸零一次
+    img.src = src;
+    sc.scrollTop = 0;
   }
   function openCollectionOld() {
     const list = $('collList'); list.innerHTML = '';
