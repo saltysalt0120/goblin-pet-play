@@ -72,8 +72,8 @@
       ev_count: '{type} · 遇到 {n} 次',
       ev_more: '（再 {k} 次上色）',
       locked: '？？？',
-      comic_open: '📖 看四格漫畫',
-      comic_sub: '四格漫畫',
+      comic_open: '📖 看漫畫',
+      comic_sub: '漫畫',
       // 守則
       rules_title: '哥布林生存守則', rules_sub: '各位哥布林謹記',
       // 設定
@@ -173,7 +173,7 @@
       ev_more: '({k} more to unlock the art)',
       locked: '？？？',
       comic_open: '📖 Read the comic',
-      comic_sub: '4-panel comic',
+      comic_sub: 'Comic',
       // 守則
       rules_title: 'Goblin Survival Rules', rules_sub: 'memorize these, goblins',
       // 設定

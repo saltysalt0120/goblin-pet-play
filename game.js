@@ -787,17 +787,32 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     }
     showOverlay('endingView');
   }
+  // 條漫很長（一整集），單張圖會超過 WebP 的 16383px 上限，所以切成
+  // comic_<id>.png、comic_<id>_2.png、_3…… 依序往下接。載到 404 就停。
   function openComic(id, src) {
     $('cvName').textContent = L(S.endings[id].name);
-    const img = $('cvImg'), sc = $('cvScroll');
+    const sc = $('cvScroll');
     // 先把浮層顯示出來再捲動：display:none 的元素設 scrollTop 無效，
     // 會沿用上一則漫畫的位置，等於一打開就看到別人的最後一格。
     showOverlay('comicView');
-    img.removeAttribute('src');          // 先清掉，避免還顯示著上一張
+    sc.innerHTML = '';
     sc.scrollTop = 0;
-    img.onload = () => { sc.scrollTop = 0; };   // 圖高度改變後再歸零一次
-    img.src = src;
-    sc.scrollTop = 0;
+    const ext = src.slice(src.lastIndexOf('.'));
+    const stem = src.slice(0, src.lastIndexOf('.'));
+    const token = (openComic._token = (openComic._token || 0) + 1);
+    const addPart = (n) => {
+      const img = document.createElement('img');
+      img.alt = '';
+      img.onload = () => {
+        if (token !== openComic._token) return;   // 中途換了一則漫畫
+        if (n === 1) sc.scrollTop = 0;
+        addPart(n + 1);                           // 接下一段，沒有就 onerror 停
+      };
+      img.onerror = () => { if (n > 1) img.remove(); };
+      img.src = n === 1 ? src : stem + '_' + n + ext;
+      sc.appendChild(img);
+    };
+    addPart(1);
   }
   function openCollectionOld() {
     const list = $('collList'); list.innerHTML = '';
