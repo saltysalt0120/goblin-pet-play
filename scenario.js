@@ -573,7 +573,7 @@
 
       // ---------- 15 健身房教練 ----------
       {
-        id: 'coach', weight: 6,
+        id: 'coach', weight: 6, requires: ['act:gym'],
         sender: { name: '教練布魯', kind: 'adventurer', avatar: '🏋️' },
         nodes: {
           start: {

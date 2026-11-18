@@ -209,6 +209,8 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     if (a.energy < 0 && state.stats.energy < -a.energy) { say(T('too_tired')); return; }
     if (a.cost && state.stats.gold < a.cost) { say(T('no_money', { name: L(a.name), cost: a.cost })); return; }
     busy = true;
+    if (!state.seen) state.seen = {};
+    state.seen['act:' + a.id] = true;      // thread 的 requires 可以指定 'act:gym'
     if (a.cost) state.stats.gold -= a.cost;
     state.stats.energy = Math.max(0, Math.min(STAT_MAX.energy, state.stats.energy + a.energy));
     let line = L(pick(a.lines));
@@ -255,8 +257,10 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     return rand(r[0], r[1]);
   }
   function scheduleNext() { state.nextMsgAt = Date.now() + interval(); save(); }
-  // thread 可以宣告 requires: ['merchant']——那些 thread 這一世出現過，它才會被抽到。
-  // 用在有前後關係的對話（例如老皮的「二代人類套裝」要先買過初代才講得通）。
+  // thread 可以宣告 requires: ['merchant'] 或 requires: ['act:gym']——
+  // 前者是「那個 thread 這一世出現過」，後者是「玩家這一世做過那個動作」，
+  // 都滿足了這個 thread 才會被抽到。用在有前後關係的對話
+  // （老皮的「二代人類套裝」要先買過初代；教練的「你上次來做了三下」要先去過健身房）。
   function ready(t) {
     if (!t.requires || !t.requires.length) return true;
     const seen = (state && state.seen) || {};
