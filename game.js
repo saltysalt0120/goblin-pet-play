@@ -273,11 +273,22 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   // 前者是「那個 thread 這一世出現過」，後者是「玩家這一世做過那個動作」，
   // 都滿足了這個 thread 才會被抽到。用在有前後關係的對話
   // （老皮的「二代人類套裝」要先買過初代；教練的「你上次來做了三下」要先去過健身房）。
+  function gated(t) { return !!(t.requires || t.minSurvived || t.maxStats || t.jobIs || t.afterSeen); }
   function ready(t) {
+    if (!state) return !gated(t);
     // minSurvived：活過幾封訊息才會出現，用在需要鋪陳的後期事件（魔王戰）
-    if (t.minSurvived && (!state || state.survived < t.minSurvived)) return false;
+    if (t.minSurvived && state.survived < t.minSurvived) return false;
+    // jobIs：限定還沒轉職的那一隻（魔王戰的主角是弱小的普通哥布林）
+    if (t.jobIs && state.job !== t.jobIs) return false;
+    // maxStats：嚴格小於。{ str: 2 } = 力量必須小於 2
+    if (t.maxStats) for (const [k, v] of Object.entries(t.maxStats)) if (state.stats[k] >= v) return false;
+    // afterSeen：某條支線出現過，而且之後又活了幾則才輪到這條
+    if (t.afterSeen) {
+      const at = state.seenAt && state.seenAt[t.afterSeen.id];
+      if (at == null || state.survived < at + t.afterSeen.gap) return false;
+    }
     if (!t.requires || !t.requires.length) return true;
-    const seen = (state && state.seen) || {};
+    const seen = state.seen || {};
     return t.requires.every((id) => seen[id]);
   }
   function pickThread() {
@@ -286,7 +297,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     const fate = S.threads.find((t) => t.fate);
     if (fate && !state.fateDone && Math.random() < (S.meta.fateChance || 0)) return fate;
     if (rare.length && Math.random() < S.meta.rareChance) return pick(rare);
-    if (!normal.length) normal = S.threads.filter((t) => !t.rare && !t.fate);
+    if (!normal.length) normal = S.threads.filter((t) => !t.rare && !t.fate && !gated(t));
     const total = normal.reduce((n, t) => n + t.weight, 0);
     let r = Math.random() * total;
     for (const t of normal) { r -= t.weight; if (r <= 0) return t; }
@@ -296,7 +307,9 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     const t = forced || pickThread();
     if (t.fate) state.fateDone = true;   // 拒絕後會被 closeThread 放回 false，但 fateFullUsed 不會，所以月老只能靠隨機那條回來
     if (!state.seen) state.seen = {};        // 舊存檔沒有這個欄位
+    if (!state.seenAt) state.seenAt = {};
     state.seen[t.id] = true;
+    if (state.seenAt[t.id] == null) state.seenAt[t.id] = state.survived;   // 第一次遇到是第幾則，afterSeen 用
     state.pending = { threadId: t.id, node: 'start', log: [], shown: false };
     save(); renderStats();
     const first = L(t.nodes.start.text[0]);

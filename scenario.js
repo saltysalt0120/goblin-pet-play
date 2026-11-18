@@ -803,7 +803,9 @@
 
       // ---------- 21 魔王（後期事件，要先認識嘎嘎） ----------
       {
-        id: 'demon', weight: 7, requires: ['bro'], minSurvived: 6,
+        id: 'demon', weight: 20, requires: ['bro'], afterSeen: { id: 'bro', gap: 2 },
+        minSurvived: 4, jobIs: 'goblin',   // 不能轉職＝三圍都沒到 5、金幣沒到 150，本來就是弱小的普通哥布林
+                                           // 不再疊 maxStats：對話本身就會加三圍，疊上去機率會歸零（2026-11-18 模擬）
         sender: { name: '？？？', kind: 'monster', avatar: '👹' },
         nodes: {
           start: {
