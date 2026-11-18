@@ -186,6 +186,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   }
   function renderActions() {
     const box = $('actions'); box.innerHTML = '';
+    const setCols = () => box.classList.toggle('n7', box.children.length === 7);
     for (const a of S.actions) {
       if (a.blood && !(state && state.blood)) continue;     // 沒有作者血脈就沒有化妝
       const b = document.createElement('button');
@@ -195,6 +196,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       b.onclick = () => doAction(a);
       box.appendChild(b);
     }
+    setCols();
   }
   // 有畫好的圖示就換掉 emoji；沒有就維持 emoji，兩種都不會壞
   function useIcon(btn, name) {

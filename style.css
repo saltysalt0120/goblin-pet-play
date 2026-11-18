@@ -93,6 +93,11 @@ button { font-family: inherit; cursor: pointer; }
 .stats.hasGlam .stat[data-stat="energy"] { grid-column: 1 / -1; }
 .stat b { width: 16px; text-align: right; font-weight: 600; }
 .actions { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+/* 抽到作者血脈時多一個「化妝」，固定 6 欄會讓第二列只剩「睡覺」一個、右邊空五格。
+   欄數跟著動作數走，七個就排成一列。 */
+.actions.n7 { grid-template-columns: repeat(7, 1fr); }
+.actions.n7 button { padding: 6px 0 4px; font-size: 11px; }
+.actions.n7 button small { font-size: 8px; }
 .actions button {
   background: var(--panel-2); border: 1px solid rgba(255,255,255,.08); color: var(--text); border-radius: 10px; padding: 7px 0 5px;
   display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 12px;
