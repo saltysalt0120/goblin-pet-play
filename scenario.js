@@ -62,7 +62,7 @@
       foodDecayMs: 5 * 60 * 1000,     // 每 5 分鐘飽食 -1
       starveGraceMs: 4 * 60 * 1000,   // 飽食歸零後撐 4 分鐘就餓死
       wageTable: [
-        { p: 0.25, range: [3, 7], label: '血汗' },
+        { p: 0.25, range: [3, 7], label: '血汗', poor: true },   // 有作者血脈的哥布林抽不到這一檔
         { p: 0.45, range: [9, 18], label: '普通' },
         { p: 0.22, range: [22, 40], label: '不錯' },
         { p: 0.08, range: [70, 140], label: '含金湯匙' },

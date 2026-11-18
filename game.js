@@ -13,12 +13,16 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
 
   // ---------- 存檔 ----------
   function freshGoblin(gender, keep) {
+    // 作者血脈：只有哥布林（男）抽得到，解鎖化妝與偽娘結局
+    const blood = gender === 'm' && Math.random() < (S.meta.bloodlineChance || 0);
     return {
       gender,
       dead: false,            // 這一世是否已經結束（死了就不再跑 tick）
       stats: { str: 0, int: 0, cha: 0, gold: 10, food: 8, energy: 10, glam: 0 },
-      blood: gender === 'm' && Math.random() < (S.meta.bloodlineChance || 0),   // 作者血脈：只有哥布林抽得到
-      wage: rollWage(),       // 出生時抽到的薪資 { amount, label }
+      blood,
+      // 偽娘結局要化妝練滿（10 次 × 8 金），抽到血汗薪資（平均 5 金）等於要工作 16 次，
+      // 一輩子平均只活 8.5 封訊息，根本做不完。有血脈就跳過最低那一檔。
+      wage: rollWage(blood),  // 出生時抽到的薪資 { amount, label }
       job: 'goblin',
       graveyard: keep ? (keep.graveyard || []) : [],   // 遺照牆：每一隻死掉的哥布林
       lastFoodTick: Date.now(),
@@ -35,10 +39,12 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       opts: keep ? keep.opts : { notify: true, fast: false },
     };
   }
-  function rollWage() {
-    const r = Math.random(); let acc = 0;
-    for (const w of S.economy.wageTable) { acc += w.p; if (r <= acc) return { amount: Math.round(rand(w.range[0], w.range[1])), label: w.label }; }
-    const w = S.economy.wageTable[1]; return { amount: Math.round(rand(w.range[0], w.range[1])), label: w.label };
+  function rollWage(blood) {
+    const table = S.economy.wageTable.filter((w) => !(blood && w.poor));
+    const total = table.reduce((n, w) => n + w.p, 0);          // 少一檔之後把機率重新歸一
+    const r = Math.random() * total; let acc = 0;
+    for (const w of table) { acc += w.p; if (r <= acc) return { amount: Math.round(rand(w.range[0], w.range[1])), label: w.label }; }
+    const w = table[0]; return { amount: Math.round(rand(w.range[0], w.range[1])), label: w.label };
   }
   let state = null;
   function load() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)); } catch { return null; } }
