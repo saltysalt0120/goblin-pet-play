@@ -219,6 +219,17 @@
 
   // 劇本字串：中文原文 → 英文在地化（Z 世代美式口語，不是直譯）
   const TXT = {
+    // ---- 2026-11-18 月老：暫時不想談戀愛 ----
+    '月老，我現在不想談戀愛': "cupid i'm not looking to date right now",
+    '……你知道有多少人求我翻到這一頁嗎。': "...do you know how many people beg me to turn to this page.",
+    '（他把姻緣簿闔上）': "(He closes the ledger)",
+    '算了。你這個年紀的，說不想就是不想。': "fine. at your age, no means no.",
+    '（他把筊收回袖子裡）': "(He tucks the coins back into his sleeve)",
+    '我把你這一頁折個角。哪天想通了，自己來找我。': "i'm dog-earing your page. come find me when you change your mind.",
+    '（道謝，回洞窟）': "(Say thanks. Go home)",
+    '（等一下）我還是擲': "(wait) actually i'll throw",
+    '暫時不想談戀愛': "Not Looking Right Now",
+    '你跟月老說你現在不想談戀愛。他愣了一下，說這句話他三千年來聽過很多次，但從哥布林嘴裡聽到是第一次。他把姻緣簿闔上，在你那一頁折了個角。你回洞窟，繼續回訊息。': "You told Cupid you're not looking to date right now. He paused. He said he's heard that line plenty in three thousand years, but never from a goblin. He closed the ledger, dog-eared your page, and let you go. You went home and kept answering messages.",
     // ---- 2026-11-17 新增的九個對話 ----
     '【系統通知】您的洞窟本月管理費尚未繳納': "[AUTOMATED] Your cave maintenance fee for this month is unpaid",
     '逾期本處將派員前往清理': "If unpaid, our office will dispatch staff to clear the property",

@@ -552,6 +552,8 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     const e = S.endings[endId];
     const text = L(e.text);
     state.pending = null;
+    // 拒絕月老不是結束——他說「哪天想通了自己來找我」，所以這一世還能再遇到一次
+    if (endId === 'a_nodate') state.fateDone = false;
     if (e.type === 'alive') {
       state.survived += 1;
       addMsg('sys', '— ' + L(e.name) + ' —'); addMsg('sys', text);
