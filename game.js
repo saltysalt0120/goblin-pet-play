@@ -273,6 +273,8 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   // 都滿足了這個 thread 才會被抽到。用在有前後關係的對話
   // （老皮的「二代人類套裝」要先買過初代；教練的「你上次來做了三下」要先去過健身房）。
   function ready(t) {
+    // minSurvived：活過幾封訊息才會出現，用在需要鋪陳的後期事件（魔王戰）
+    if (t.minSurvived && (!state || state.survived < t.minSurvived)) return false;
     if (!t.requires || !t.requires.length) return true;
     const seen = (state && state.seen) || {};
     return t.requires.every((id) => seen[id]);
