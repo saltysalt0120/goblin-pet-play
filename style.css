@@ -88,6 +88,9 @@ button { font-family: inherit; cursor: pointer; }
 .stat[data-stat="energy"] .bar i { background: var(--accent); }
 .stat[data-stat="gold"] .bar i { background: #e0b43a; }
 .stat[data-stat="gold"] b { width: 30px; }
+.stat[data-stat="glam"] .bar i { background: #d86fa5; }
+/* 抽到作者血脈時數值變七個，3 欄 grid 的最後一列只剩一個，撐滿整列才不會空一大塊 */
+.stats.hasGlam .stat[data-stat="energy"] { grid-column: 1 / -1; }
 .stat b { width: 16px; text-align: right; font-weight: 600; }
 .actions { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
 .actions button {

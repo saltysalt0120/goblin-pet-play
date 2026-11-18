@@ -160,7 +160,10 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   function renderStats() {
     for (const el of document.querySelectorAll('.stat')) {
       const k = el.dataset.stat;
-      if (k === 'glam') el.classList.toggle('hidden', !state.blood);
+      if (k === 'glam') {
+        el.classList.toggle('hidden', !state.blood);
+        el.parentElement.classList.toggle('hasGlam', !!state.blood);
+      }
       const v = state.stats[k];
       el.querySelector('i').style.width = Math.min(100, (v / STAT_MAX[k]) * 100) + '%';
       el.querySelector('b').textContent = v;
@@ -888,6 +891,10 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     $('badge').onclick = openChat;
     $('btnInbox').onclick = openChat;
     $('chatClose').onclick = () => { if (window.GoblinAudio) window.GoblinAudio.setMood('idle'); showOverlay(null); };
+    // 擲筊原本沒有關閉鍵，一遇到月老就被鎖在這一頁出不去。
+    // 關掉只是先退出去，進度（已經丟過幾筊）存在 state.pending.jiao，
+    // 從收件匣點回來會接著丟。
+    $('jiaoClose').onclick = () => { save(); showOverlay(null); };
     $('btnCollection').onclick = openCollection;
     $('btnEndings').onclick = openEndings;
     $('endingsClose').onclick = () => showOverlay(null);

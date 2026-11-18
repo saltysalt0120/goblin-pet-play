@@ -44,6 +44,7 @@
       boot_say: '嘎。我是{job}。',
       // 擲筊 / 許願池
       jiao_head: '月老 · 擲筊',
+      jiao_close_t: '先離開（進度會留著）',
       jiao_count: '聖筊 {n} / {N}',
       jiao_count0: '聖筊 0 / 5',
       jiao_btn: '擲', jiao_btn_done: '聽月老怎麼說',
@@ -142,6 +143,7 @@
       boot_say: 'Ngah. I am a {job}.',
       // 許願池（英文版把擲筊換成丟硬幣進許願池，機率完全一樣）
       jiao_head: 'Cupid · Wishing Fountain',
+      jiao_close_t: 'Leave for now (progress is kept)',
       jiao_count: 'In the fountain: {n} / {N}',
       jiao_count0: 'In the fountain: 0 / 5',
       jiao_btn: 'Toss', jiao_btn_done: 'Hear Cupid out',
