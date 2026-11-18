@@ -27,7 +27,8 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       graveyard: keep ? (keep.graveyard || []) : [],   // 遺照牆：每一隻死掉的哥布林
       lastFoodTick: Date.now(),
       starvedAt: null,
-      fateDone: false,        // 這一世是否已經遇過月老（三圍全滿觸發只給一次）
+      fateDone: false,        // 這一世是否已經遇過月老
+      fateFullUsed: false,    // 三圍全滿的那條觸發，每一世只給一次（拒絕後也不會再給）
       seen: {},               // 這一世已經出現過的 thread id；thread 的 requires 會看這個
       milestoneDone: {},      // 已經觸發過的里程碑結局
       survived: 0,
@@ -293,7 +294,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   }
   function newMessage(forced) {
     const t = forced || pickThread();
-    if (t.fate) state.fateDone = true;
+    if (t.fate) state.fateDone = true;   // 拒絕後會被 closeThread 放回 false，但 fateFullUsed 不會，所以月老只能靠隨機那條回來
     if (!state.seen) state.seen = {};        // 舊存檔沒有這個欄位
     state.seen[t.id] = true;
     state.pending = { threadId: t.id, node: 'start', log: [], shown: false };
@@ -346,7 +347,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
 
     // 三圍全滿：月老直接來（每世一次）
     const fateT = S.threads.find((t) => t.fate);
-    if (!state.pending && fateT && !state.fateDone && (S.meta.fateFullStats || []).every((k) => state.stats[k] >= STAT_MAX[k])) { newMessage(fateT); return; }
+    if (!state.pending && fateT && !state.fateDone && !state.fateFullUsed && (S.meta.fateFullStats || []).every((k) => state.stats[k] >= STAT_MAX[k])) { state.fateFullUsed = true; newMessage(fateT); return; }
     if (!state.pending && now >= state.nextMsgAt) newMessage();
     else if (!state.pending && Math.random() < 0.08 && $('bubble').classList.contains('hidden') && !busy) { say(L(pick(S.idleLines)), 2500); face(pick(['happy', 'wink', 'think']), 2500); }
     else if (!busy && Math.random() < 0.04) face('happy', 1200);
@@ -373,6 +374,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     $('chatLog').innerHTML = ''; $('chatChoices').innerHTML = '';
     for (const m of state.pending.log) addMsg(m.cls, m.text);
     if (state.pending.node === '__end') { finish(state.pending.end); return; }   // 結果已經定了
+    if (state.pending.node === '__done') { closeThread(state.pending.again); return; }   // 中途重開：這段已經結束，回遊戲
     if (state.pending.node === '__jiao') { openJiao(); return; }
     if (window.GoblinAudio) window.GoblinAudio.setMood('chat');
     showOverlay('chatScreen');
@@ -429,6 +431,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       save(); setTimeout(openJiao, 400);
     }
     else if (r.next) { state.pending.node = r.next; state.pending.shown = false; save(); setTimeout(() => playNode(r.next, false), 400); }
+    else if (r.done) { state.pending.node = '__done'; state.pending.again = !!r.fateAgain; save(); setTimeout(() => closeThread(r.fateAgain), 500); }   // 不是結局：關掉對話回遊戲
     else { state.pending.node = '__end'; state.pending.end = r.end; save(); setTimeout(() => finish(r.end), 500); }   // 先存結果，中途重開不能重骰
   }
 
@@ -581,12 +584,21 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     state.pending.node = to; state.pending.shown = false; save();
     openChat();
   }
+  // 這段對話結束，但這一世沒有結束：不跳結局畫面，直接回遊戲等下一則訊息
+  function closeThread(fateAgain) {
+    state.pending = null;
+    state.survived += 1;
+    if (fateAgain) state.fateDone = false;   // 月老說「哪天想通了自己來找我」，所以還能再遇到
+    const b = document.createElement('button'); b.textContent = T('back_to_cave'); b.className = 'primary';
+    b.onclick = () => { showOverlay(null); };
+    $('chatChoices').innerHTML = ''; $('chatChoices').appendChild(b);
+    checkJobChange(); scheduleNext(); renderStats(); save();
+  }
+
   function finish(endId) {
     const e = S.endings[endId];
     const text = L(e.text);
     state.pending = null;
-    // 拒絕月老不是結束——他說「哪天想通了自己來找我」，所以這一世還能再遇到一次
-    if (endId === 'a_nodate') state.fateDone = false;
     if (e.type === 'alive') {
       state.survived += 1;
       addMsg('sys', '— ' + L(e.name) + ' —'); addMsg('sys', text);
