@@ -24,6 +24,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       lastFoodTick: Date.now(),
       starvedAt: null,
       fateDone: false,        // 這一世是否已經遇過月老（三圍全滿觸發只給一次）
+      seen: {},               // 這一世已經出現過的 thread id；thread 的 requires 會看這個
       milestoneDone: {},      // 已經觸發過的里程碑結局
       survived: 0,
       generation: keep ? keep.generation + 1 : 1,
@@ -254,12 +255,20 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     return rand(r[0], r[1]);
   }
   function scheduleNext() { state.nextMsgAt = Date.now() + interval(); save(); }
+  // thread 可以宣告 requires: ['merchant']——那些 thread 這一世出現過，它才會被抽到。
+  // 用在有前後關係的對話（例如老皮的「二代人類套裝」要先買過初代才講得通）。
+  function ready(t) {
+    if (!t.requires || !t.requires.length) return true;
+    const seen = (state && state.seen) || {};
+    return t.requires.every((id) => seen[id]);
+  }
   function pickThread() {
-    const rare = S.threads.filter((t) => t.rare);
-    const normal = S.threads.filter((t) => !t.rare && !t.fate);
+    const rare = S.threads.filter((t) => t.rare && ready(t));
+    let normal = S.threads.filter((t) => !t.rare && !t.fate && ready(t));
     const fate = S.threads.find((t) => t.fate);
     if (fate && !state.fateDone && Math.random() < (S.meta.fateChance || 0)) return fate;
-    if (Math.random() < S.meta.rareChance) return pick(rare);
+    if (rare.length && Math.random() < S.meta.rareChance) return pick(rare);
+    if (!normal.length) normal = S.threads.filter((t) => !t.rare && !t.fate);
     const total = normal.reduce((n, t) => n + t.weight, 0);
     let r = Math.random() * total;
     for (const t of normal) { r -= t.weight; if (r <= 0) return t; }
@@ -268,6 +277,8 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   function newMessage(forced) {
     const t = forced || pickThread();
     if (t.fate) state.fateDone = true;
+    if (!state.seen) state.seen = {};        // 舊存檔沒有這個欄位
+    state.seen[t.id] = true;
     state.pending = { threadId: t.id, node: 'start', log: [], shown: false };
     save(); renderStats();
     const first = L(t.nodes.start.text[0]);

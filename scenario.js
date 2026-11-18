@@ -495,7 +495,7 @@
 
       // ---------- 13 二手裝備商 ----------
       {
-        id: 'gear', weight: 7,
+        id: 'gear', weight: 7, requires: ['merchant'],
         sender: { name: '老皮', kind: 'adventurer', avatar: '🎒' },
         nodes: {
           start: {
@@ -534,7 +534,7 @@
 
       // ---------- 14 勇者團回頭找你 ----------
       {
-        id: 'hero2', weight: 5,
+        id: 'hero2', weight: 5, requires: ['party'],
         sender: { name: '勇者團隊長', kind: 'adventurer', avatar: '⚔️' },
         nodes: {
           start: {
