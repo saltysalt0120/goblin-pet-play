@@ -389,11 +389,25 @@
               { label: '（搬家）', results: [{ end: 'a_escape' }] },
             ],
           },
+          dragon_yes: {
+            text: ['（兩個聖筊）', '（你把筊收起來，深吸一口氣）', '（龍看著你手上那兩塊木頭，忽然笑了）', '……你問過了？'],
+            choices: [
+              { label: '問過了。祂說可以', results: [{ cond: { stat: 'cha', min: 2 }, end: 'a_tenant' }, { prob: 0.6, end: 'a_tenant' }, { end: 'a_escape' }] },
+            ],
+          },
+          dragon_no: {
+            text: ['（沒有聖筊）', '（你默默把筊收回口袋）', '（龍還在等你說話）'],
+            choices: [
+              { label: '（改口）那我當房客可以嗎', results: [{ end: 'a_tenant' }] },
+              { label: '（搬家）', results: [{ end: 'a_escape' }] },
+            ],
+          },
           argue: {
             text: ['（龍深深吸了一口氣。洞窟裡開始變熱）', '……先、來、後、到'],
             choices: [
               { label: '（馬上改口）那我當房客可以嗎', results: [{ cond: { stat: 'int', min: 1 }, end: 'a_tenant' }, { prob: 0.5, end: 'a_tenant' }, { end: 'd_landlord' }] },
               { label: '（把洞窟裡最好的東西捧出去給牠）', results: [{ cond: { stat: 'gold', min: 30 }, end: 'a_tenant', gain: { gold: -30 } }, { prob: 0.4, end: 'a_escape' }, { end: 'd_landlord' }] },
+              { label: '（掏出隨身的筊，問一下）', results: [{ next: '__jiao', jiao: { n: 3, map: { 2: 'dragon_yes', 0: 'dragon_no' } } }] },
               { label: '（繼續講道理）', results: [{ end: 'd_landlord' }] },
             ],
           },
@@ -413,11 +427,25 @@
               { label: '我帶你去', results: [{ cond: { stat: 'cha', min: 3 }, end: 'a_walk', gain: { cha: 1 } }, { cond: { stat: 'str', min: 4 }, end: 'a_walk' }, { next: 'escort' }] },
             ],
           },
+          escort_ok: {
+            text: ['（兩個聖筊）', '（你指了指另一邊的樹叢）', '（她看了你一眼，跟上）'],
+            choices: [
+              { label: '（繞過去）', results: [{ end: 'a_walk', gain: { cha: 1 } }] },
+            ],
+          },
+          escort_bad: {
+            text: ['（沒有聖筊）', '（你站在原地沒有動）', '（衛兵走過去了）'],
+            choices: [
+              { label: '（讓她自己走）', results: [{ end: 'a_guide' }] },
+              { label: '（還是跟上去）', results: [{ cond: { stat: 'str', min: 3 }, end: 'a_escape' }, { end: 'd_guard' }] },
+            ],
+          },
           escort: {
             text: ['（走到森林邊，前面有兩個衛兵在巡邏）', '……糟糕，他們是來找我的'],
             choices: [
               { label: '（把她推到樹後，自己走出去）', results: [{ cond: { stat: 'str', min: 1 }, end: 'a_walk', gain: { cha: 1 } }, { prob: 0.5, end: 'a_escape' }, { end: 'd_guard' }] },
               { label: '（停在這裡，讓她自己走過去）', results: [{ end: 'a_guide' }] },
+              { label: '（先擲個筊問問看）', results: [{ next: '__jiao', jiao: { n: 3, map: { 2: 'escort_ok', 0: 'escort_bad' } } }] },
               { label: '（兩個一起走出去）', results: [{ end: 'd_guard' }] },
             ],
           },
@@ -717,6 +745,54 @@
             choices: [
               { label: '（也下線）', results: [{ end: 'a_rock', gain: { int: 1 } }] },
               { label: '（繼續回訊息）', results: [{ end: 'a_ghost' }] },
+            ],
+          },
+        },
+      },
+
+      // ---------- 20 撿到一對筊 ----------
+      {
+        id: 'omen', weight: 6,
+        sender: { name: '嘎嘎', kind: 'goblin', avatar: '🧟' },
+        nodes: {
+          start: {
+            text: ['兄弟', '我在洞窟深處撿到兩塊木頭', '彎的，一面平一面圓', '聽說人類拿這個問神明事情'],
+            choices: [
+              { label: '（接過來，問問今天的運氣）', results: [{ next: '__jiao', jiao: { n: 3, map: { 3: 'omen3', 2: 'omen2', 1: 'omen1', 0: 'omen0' } } }] },
+              { label: '那是筊，不是木頭', results: [{ cond: { stat: 'int', min: 2 }, end: 'a_ghost', gain: { int: 1 } }, { next: 'teach' }] },
+              { label: '（叫他丟掉）', results: [{ end: 'a_rock' }] },
+            ],
+          },
+          teach: {
+            text: ['什麼叫筊', '（他把兩塊木頭在手上翻來翻去）', '那要怎麼用'],
+            choices: [
+              { label: '（示範給他看）', results: [{ next: '__jiao', jiao: { n: 3, map: { 2: 'omen2', 0: 'omen0' } } }] },
+              { label: '我也不知道', results: [{ end: 'a_laughed' }] },
+            ],
+          },
+          omen3: {
+            text: ['（三個聖筊）', '（嘎嘎瞪大眼睛）', '兄弟', '你是不是有什麼我不知道的事'],
+            choices: [
+              { label: '（收下那對筊）', results: [{ end: 'a_rock', gain: { cha: 1, int: 1 } }] },
+            ],
+          },
+          omen2: {
+            text: ['（兩個聖筊）', '（嘎嘎點點頭，一副很懂的樣子）', '所以今天可以出門對吧'],
+            choices: [
+              { label: '應該吧', results: [{ end: 'a_ghost', gain: { cha: 1 } }] },
+            ],
+          },
+          omen1: {
+            text: ['（一個聖筊）', '（嘎嘎把筊撿起來又丟了一次）', '（你阻止他）', '不能重骰'],
+            choices: [
+              { label: '不能重骰', results: [{ end: 'a_rule8', gain: { int: 1 } }] },
+            ],
+          },
+          omen0: {
+            text: ['（一個聖筊都沒有）', '（兩隻哥布林看著地上那對筊）', '（誰都沒有先開口）'],
+            choices: [
+              { label: '（今天待在洞窟裡）', results: [{ end: 'a_rule8' }] },
+              { label: '（還是出門）', results: [{ prob: 0.5, end: 'a_escape' }, { end: 'a_ghost' }] },
             ],
           },
         },

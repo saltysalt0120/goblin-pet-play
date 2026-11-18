@@ -420,14 +420,21 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     }
     if (!r) r = c.results[c.results.length - 1];
     if (r.gain) for (const [k, v] of Object.entries(r.gain)) state.stats[k] = Math.max(0, Math.min(STAT_MAX[k], state.stats[k] + v));
-    if (r.next === '__jiao') { state.pending.node = '__jiao'; state.pending.shown = true; state.pending.jiao = { throws: [] }; save(); setTimeout(openJiao, 400); }
+    if (r.next === '__jiao') {
+      state.pending.node = '__jiao'; state.pending.shown = true;
+      // 劇本可以指定這次丟幾次、以及聖筊數對應到哪
+      state.pending.jiao = { throws: [], n: (r.jiao && r.jiao.n) || JIAO_DEFAULT_N, map: r.jiao && r.jiao.map };
+      save(); setTimeout(openJiao, 400);
+    }
     else if (r.next) { state.pending.node = r.next; state.pending.shown = false; save(); setTimeout(() => playNode(r.next, false), 400); }
     else { state.pending.node = '__end'; state.pending.end = r.end; save(); setTimeout(() => finish(r.end), 500); }   // 先存結果，中途重開不能重骰
   }
 
   // ---------- 擲筊小遊戲：擲五次，數聖筊 ----------
   // 每擲：聖筊 1/2、笑筊 1/4、陰筊 1/4（跟真的筊一樣）
-  const JIAO_N = 5;
+  const JIAO_DEFAULT_N = 5;
+  // 這一次擲筊要丟幾次：由劇本的 { next: '__jiao', jiao: { n, map } } 決定
+  function jiaoN() { return (state.pending && state.pending.jiao && state.pending.jiao.n) || JIAO_DEFAULT_N; }
   function jiaoRoll() {
     const a = Math.random() < 0.5, b = Math.random() < 0.5;   // true=平面朝上
     return a !== b ? 'sheng' : (a ? 'xiao' : 'yin');
@@ -453,17 +460,20 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
   function openJiao() {
     const j = state.pending.jiao || (state.pending.jiao = { throws: [] });
     const dots = $('jiaoDots'); dots.innerHTML = '';
-    for (let i = 0; i < JIAO_N; i++) { const d = document.createElement('span'); d.className = 'dot ' + (j.throws[i] || ''); dots.appendChild(d); }
+    for (let i = 0; i < jiaoN(); i++) { const d = document.createElement('span'); d.className = 'dot ' + (j.throws[i] || ''); dots.appendChild(d); }
     const n = j.throws.filter((x) => x === 'sheng').length;
-    $('jiaoCount').textContent = T('jiao_count', { n, N: JIAO_N });
-    const done = j.throws.length >= JIAO_N;
+    $('jiaoCount').textContent = T('jiao_count', { n, N: jiaoN() });
+    const done = j.throws.length >= jiaoN();
     $('jiaoHint').textContent = done ? '' : T('jiao_h' + Math.min(4, j.throws.length));
     const btn = $('jiaoBtn');
-    btn.textContent = done ? T('jiao_btn_done') : T('jiao_btn');
+    const isFate = thread() && thread().fate;          // 只有月老用他專屬的文案
+    btn.textContent = done ? T(isFate ? 'jiao_btn_done' : 'jiao_btn_done_x') : T('jiao_btn');
+    const head = document.querySelector('#jiaoScreen .chatHead div div');
+    if (head) head.textContent = T(isFate ? 'jiao_head' : 'jiao_head_x');
     btn.disabled = false;
     btn.onclick = done ? jiaoFinish : jiaoThrow;
     const last = j.throws[j.throws.length - 1];
-    jiaoArt(j.throws.length === 0 ? 'offer' : (done && n >= JIAO_N) ? 'win' : last);
+    jiaoArt(j.throws.length === 0 ? 'offer' : (done && n >= jiaoN()) ? 'win' : last);
     jiaoSetPieces(last || 'sheng', false);
     $('jiaoStage').className = 'jiaoStage';
     jiaoReset();
@@ -486,7 +496,7 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
     if (jiaoBound) return; jiaoBound = true;
     const st = $('jiaoStage');
     st.addEventListener('pointerdown', (e) => {
-      if (jiaoBusy || state.pending.jiao.throws.length >= JIAO_N) return;
+      if (jiaoBusy || state.pending.jiao.throws.length >= jiaoN()) return;
       jiaoDrag = { x: e.clientX, y: e.clientY, t: Date.now() };
       st.classList.add('dragging'); st.setPointerCapture(e.pointerId);
     });
@@ -510,13 +520,13 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       if (m > 34 && Date.now() - shakeLast > 1200) {
         shakeLast = Date.now();
         if (!jiaoBusy && !$('jiaoScreen').classList.contains('hidden') && state.pending && state.pending.jiao
-            && state.pending.jiao.throws.length < JIAO_N) jiaoThrow();
+            && state.pending.jiao.throws.length < jiaoN()) jiaoThrow();
       }
     });
   }
 
   function jiaoThrow() {
-    const j = state.pending.jiao; if (!j || j.throws.length >= JIAO_N || jiaoBusy) return;
+    const j = state.pending.jiao; if (!j || j.throws.length >= jiaoN() || jiaoBusy) return;
     jiaoBusy = true;
     const btn = $('jiaoBtn'); btn.disabled = true;
     const st = $('jiaoStage'); st.classList.remove('landed'); st.classList.add('flying');
@@ -534,26 +544,39 @@ window.PORTRAIT_ATLAS = {"cols": 6, "rows": 3, "ext": "webp", "index": {"d_newbi
       jiaoSetPieces(r, false);                    // 空中是旋轉圖，落地換成正／反面
       anims.forEach((a) => { try { a.commitStyles(); a.cancel(); } catch (_) {} });
       st.classList.remove('flying'); st.classList.add('landed');
-      const allSheng = j.throws.length >= JIAO_N && j.throws.every((x) => x === 'sheng');
+      const allSheng = j.throws.length >= jiaoN() && j.throws.every((x) => x === 'sheng');
       jiaoArt(allSheng ? 'win' : r);
       if (allSheng) { const ry = $('jiaoRays'); ry.classList.remove('hidden', 'show'); void ry.offsetWidth; ry.classList.add('show'); }
       const dots = $('jiaoDots').children; dots[j.throws.length - 1].className = 'dot ' + r;
       const n = j.throws.filter((x) => x === 'sheng').length;
-      $('jiaoCount').textContent = T('jiao_count', { n, N: JIAO_N });
+      $('jiaoCount').textContent = T('jiao_count', { n, N: jiaoN() });
       $('jiaoHint').textContent = { sheng: T('jiao_sheng'), xiao: T('jiao_xiao'), yin: T('jiao_yin') }[r];
       face(r === 'sheng' ? 'happy' : r === 'xiao' ? 'surprised' : 'angry', 1500);
-      const done = j.throws.length >= JIAO_N;
-      btn.textContent = done ? T('jiao_btn_done') : T('jiao_btn');
+      const done = j.throws.length >= jiaoN();
+      const isFate = thread() && thread().fate;          // 只有月老用他專屬的文案
+    btn.textContent = done ? T(isFate ? 'jiao_btn_done' : 'jiao_btn_done_x') : T('jiao_btn');
+    const head = document.querySelector('#jiaoScreen .chatHead div div');
+    if (head) head.textContent = T(isFate ? 'jiao_head' : 'jiao_head_x');
       btn.onclick = done ? jiaoFinish : jiaoThrow;
       btn.disabled = false; jiaoBusy = false;
       if (!done) setTimeout(() => { jiaoReset(); st.classList.remove('landed'); }, 900);
     }, 1050);
   }
+  // map 是「聖筊數 → 去哪」：{ '5': 'jiao5', '4': 'jiao4', '0': 'jiao3' }
+  // 查的時候從實際聖筊數往下找最接近的一階，所以不用把每個數字都列出來。
+  // 值可以是節點名，或 { end: 'xxx' } 直接結束。
+  function jiaoPick(map, n) {
+    const keys = Object.keys(map).map(Number).sort((a, b) => b - a);
+    for (const k of keys) if (n >= k) return map[k];
+    return map[keys[keys.length - 1]];
+  }
   function jiaoFinish() {
     const j = state.pending.jiao;
     const n = j.throws.filter((x) => x === 'sheng').length;
-    const node = n >= 5 ? 'jiao5' : n === 4 ? 'jiao4' : 'jiao3';
-    state.pending.node = node; state.pending.shown = false; save();
+    const map = j.map || { 5: 'jiao5', 4: 'jiao4', 0: 'jiao3' };   // 沒指定就是月老那一套
+    const to = jiaoPick(map, n);
+    if (to && to.end) { state.pending.node = '__end'; state.pending.end = to.end; save(); finish(to.end); return; }
+    state.pending.node = to; state.pending.shown = false; save();
     openChat();
   }
   function finish(endId) {
